@@ -10,7 +10,55 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_11_07_024822) do
+ActiveRecord::Schema[7.1].define(version: 2023_11_08_100653) do
+  create_table "bookings", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+    t.bigint "car_id", null: false, comment: "ユーザーID"
+    t.bigint "user_id", null: false, comment: "車両のID"
+    t.timestamp "booking_start", comment: "レンタル開始日"
+    t.timestamp "booking_end", comment: "レンタル終了日"
+    t.boolean "has_insurance", default: true, comment: "保険を購入しましたか？ True/false"
+    t.integer "booking_status", default: 0, comment: "10: 予定 (Upcoming), 11: 支払い待ち (Waiting for Payment), 12: 支払い済み (Paid), 20: レンタル中 (Renting), 30: 完了 (Completed), 40: キャンセル (Canceled)"
+    t.integer "car_price", comment: "車の価格"
+    t.timestamp "expired_at", comment: "に期限切れになりました"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["car_id"], name: "index_bookings_on_car_id"
+    t.index ["user_id"], name: "index_bookings_on_user_id"
+  end
+
+  create_table "brands", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+    t.string "name", comment: "車のブランド名"
+    t.text "description", comment: "車のブランド説明"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "car_models", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+    t.string "name", comment: "車種名"
+    t.text "description", comment: "車種の説明"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "cars", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+    t.bigint "brand_id", null: false, comment: "brandsテーブルのID"
+    t.bigint "car_model_id", null: false, comment: "car_modelsテーブルのID"
+    t.string "name", comment: "車の名前"
+    t.date "year", comment: "製造年"
+    t.string "color", comment: "車の色"
+    t.integer "status", default: 0, comment: "\"0: 利用可能 (available), 1: 予約済み (booked), 2: メンテナンス (maintenance)\""
+    t.text "description", comment: "車の説明"
+    t.string "address", comment: "車の住所"
+    t.string "province", comment: "車の住所"
+    t.integer "seating_capacity", comment: "車の座席数"
+    t.integer "fuel_type", comment: "\"0: ガソリン (petrol), 1: ディーゼル燃料 (diesel fuel), 2: 電気の (electric)\""
+    t.integer "price_per_hour", null: false, comment: "車の時給料金"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["brand_id"], name: "index_cars_on_brand_id"
+    t.index ["car_model_id"], name: "index_cars_on_car_model_id"
+  end
+
   create_table "oauth_access_grants", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.bigint "resource_owner_id", null: false
     t.bigint "application_id", null: false
@@ -53,6 +101,20 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_07_024822) do
     t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
   end
 
+  create_table "reviews", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+    t.bigint "user_id", null: false, comment: "ユーザーID"
+    t.bigint "car_id", null: false, comment: "車両のID"
+    t.bigint "booking_id_id", null: false, comment: "予約ID (UUID)"
+    t.float "rating", comment: "評価された星の数"
+    t.text "comment", comment: "ユーザーコメント"
+    t.integer "status", comment: "\"0: 承認待ち (Pending), 1: 承認済み (Approved)\""
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booking_id_id"], name: "index_reviews_on_booking_id_id"
+    t.index ["car_id"], name: "index_reviews_on_car_id"
+    t.index ["user_id"], name: "index_reviews_on_user_id"
+  end
+
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -65,10 +127,17 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_07_024822) do
     t.string "unconfirmed_email"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "role", limit: 1, default: 0, comment: "\"0: 管理者 (user), 1: エンドユーザー (admin)\"", unsigned: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "bookings", "cars", on_delete: :cascade
+  add_foreign_key "bookings", "users", on_delete: :cascade
+  add_foreign_key "cars", "brands", on_delete: :cascade
+  add_foreign_key "cars", "car_models", on_delete: :cascade
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
+  add_foreign_key "reviews", "cars", on_delete: :cascade
+  add_foreign_key "reviews", "users", on_delete: :cascade
 end

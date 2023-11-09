@@ -6,6 +6,18 @@ namespace :api do
             post 'password/forgot', to: 'auth#forgot'
             post 'password/reset/:token', to: 'auth#reset'
         end
+
+        resources :brands
+
+        resources :car_models
+
+        resources :cars
+
+        resources :bookings do
+            collection do
+                post '/create-booking', to: "bookings#create"
+            end
+        end
     end
 end
 

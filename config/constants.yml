@@ -1,0 +1,19 @@
+USER_ROLE:
+  USER: 0
+  ADMIN: 1
+  SUPERADMIN: 2
+
+ROLE_NAME:
+  0: USER
+  1: ADMIN
+  2: SUPERADMIN
+
+booking_status:
+  upcoming: 10
+  waiting_for_payment: 20
+  paid: 30
+  renting: 40
+  completed: 50
+  cancelled: 60
+
+

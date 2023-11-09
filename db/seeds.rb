@@ -15,4 +15,12 @@ if Doorkeeper::Application.count.zero?
     Doorkeeper::Application.create(name: "Angular", redirect_uri: "", scopes: "")
 end
 
+User.first_or_create(
+    email: "userexample@gmail.com",
+    password: 'password',
+    role: User.roles[:admin],
+    confirmation_token: nil,
+    confirmed_at: Time.now
+)
+
 
