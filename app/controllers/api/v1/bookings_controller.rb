@@ -5,15 +5,6 @@ class Api::V1::BookingsController < ApiController
     include BookingsHelper
 
     def create
-        # data= Booking.where(user_id: current_user.id)
-        #         .where.not(car_id: @car.id)
-        #         .where(booking_status: [10, 11, 12, 30])
-        #         .where('(booking_start BETWEEN ? AND ?) OR (booking_end BETWEEN ? AND ?)', 
-        #         params[:booking_start], params[:booking_end],
-        #         params[:booking_start], params[:booking_end])
-        #         .first
-        # data = calculate_car_price(@car.price_per_hour, params[:booking_start],  params[:booking_end])
-        # return render json:{data: data}
         begin
           ActiveRecord::Base.transaction do
             inputs = booking_params
@@ -44,13 +35,74 @@ class Api::V1::BookingsController < ApiController
             end
 
             car_price = calculate_car_price(@car.price_per_hour, params[:booking_start],  params[:booking_end])
-            
-            data = {}
 
-            render_success(data, 'Booking success')
+            existing_booking = Booking.where(user_id: user_id)
+                .where(car_id: @car.id)
+                .where('(booking_start BETWEEN ? AND ?) OR (booking_end BETWEEN ? AND ?)', 
+                    params[:booking_start], params[:booking_end],
+                    params[:booking_start], params[:booking_end])
+                .first
+
+            if(existing_booking)
+                current_time = Time.current
+                expired_time = existing_booking.expired_at
+                time_difference = (expired_time - current_time).to_i
+
+                if(time_difference < 10 * 60)
+                    return render_success(existing_booking, 'Booking was successfull')
+                end
+            end
+
+            params['user_id'] = user_id
+            params['car_price'] = car_price
+            params['booking_status'] = 10
+            params['has_insurance'] = 1
+            params['expired_at'] = Time.current + 10.minutes
+
+            @booking = Booking.new(booking_params)
+
+            if @booking.save 
+                render_success(@booking, 'Booking was successful')
+            else
+                render_error(@booking, 'Booking was failed')
+            end
           end
         rescue StandardError => e
           render_error('Booking failed')
+        end
+    end
+
+    def create_review
+        car_id = params['car_id']
+        rating = params['rating']
+        comment = params['comment']
+        user = current_user
+
+        booking = Booking.where(car_id: car_id)
+                    .where(user_id: user.id)
+                    .where(booking_status: 30)
+                    .first
+
+        return render_error('Booking not found') unless booking
+        
+        review = Review.where(booking_id: booking.id).first
+
+        if review
+            return render_error('Review already existed')
+        end
+
+        @review = Review.new(
+            user_id: user.id,
+            car_id: car_id,
+            rating: rating,
+            comment: comment,
+            booking_id: booking.id
+        )
+
+        if @review.save
+            return render_success(@review, 'Review was successful')
+        else
+            return render_error('Failed to review')
         end
     end
 
@@ -65,6 +117,6 @@ class Api::V1::BookingsController < ApiController
     end
 
     def booking_params
-        params.permit(:car_id, :booking_start, :booking_end)
+        params.permit(:car_id, :booking_start, :booking_end, :user_id, :car_price, :booking_status, :has_insurance, :expired_at )
     end 
 end

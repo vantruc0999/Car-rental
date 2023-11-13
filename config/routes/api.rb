@@ -11,11 +11,16 @@ namespace :api do
 
         resources :car_models
 
-        resources :cars
+        resources :cars do 
+            collection do
+                get '/recommend', to: "cars#recommend"
+            end
+        end
 
         resources :bookings do
             collection do
                 post '/create-booking', to: "bookings#create"
+                post '/:car_id/reviews', to: "bookings#create_review"
             end
         end
     end

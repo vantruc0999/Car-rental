@@ -12,6 +12,9 @@ class User < ApplicationRecord
   before_save :downcase_email
   before_create :generate_confirmation_instructions
 
+  has_many :reviews
+  has_many :bookings
+
   # the authenticate method from devise documentation
   def self.authenticate(email, password)
     user = User.find_for_authentication(email: email)

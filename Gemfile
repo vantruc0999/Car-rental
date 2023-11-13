@@ -76,3 +76,5 @@ gem "rack-cors", "~> 2.0"
 gem 'dotenv-rails', '~> 2.8', '>= 2.8.1'
 
 gem 'pundit', '~> 2.3', '>= 2.3.1'
+
+gem 'rufus-scheduler', '~> 3.9', '>= 3.9.1'
