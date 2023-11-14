@@ -10,7 +10,7 @@ module CarsConcern
                     },
                     car_model:{
                         except: [:created_at, :updated_at],
-                    }
+                    },
                 },
                 except: [:brand_id, :car_model_id, :created_at, :updated_at]
             )

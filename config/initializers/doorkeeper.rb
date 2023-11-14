@@ -25,6 +25,8 @@ Doorkeeper.configure do
     end
   end
 
+  access_token_expires_in 24.hours
+
   grant_flows %w[password]
 
   allow_blank_redirect_uri true

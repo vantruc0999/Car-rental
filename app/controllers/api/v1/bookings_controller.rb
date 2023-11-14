@@ -49,7 +49,7 @@ class Api::V1::BookingsController < ApiController
                 time_difference = (expired_time - current_time).to_i
 
                 if(time_difference < 10 * 60)
-                    return render_success(existing_booking, 'Booking was successfull')
+                    return render_success(existing_booking, 'Booking was successful')
                 end
             end
 

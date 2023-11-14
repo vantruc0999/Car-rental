@@ -1,17 +1,17 @@
 module ApiResponse
     extend ActiveSupport::Concern
   
-    def render_success(data, message, status = :ok)
+    def render_success(data, message, status = 200)
       render json: {
-        status: 'Success',
+        status: status,
         message: message,
         data: data
       }, status: status
     end
   
-    def render_error(errors, status = :unprocessable_entity)
+    def render_error(errors, status = 422)
       render json: {
-        status: 'Error',
+        status: status,
         message: errors
       }, status: status
     end
