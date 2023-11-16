@@ -42,7 +42,6 @@ class Api::V1::CarsController < ApiController
           query = query.order('average_rating DESC')
         end
 
-
         if rating.present?
             case rating.to_i
             when 1
@@ -57,8 +56,6 @@ class Api::V1::CarsController < ApiController
               query = query.having('AVG(reviews.rating) = ?', 5)
             end
         end
-
-        # return render json:{data: query}
         
         if search_term.present?
             query = query.joins(:brand, :car_model)
@@ -82,16 +79,15 @@ class Api::V1::CarsController < ApiController
             query = query.where('price_per_hour <= ?', max_price)
         end
 
-        # data = render_car_data(query)
-
+        # data = CarSerializer.new(query).serializable_hash
         # return render_success(data, 'Car loaded successfully')
 
-        render json: query.map { |car| CarSerializer.new(car).as_json }
-
+        render json: query.map { |car| CarSerializer.new(car).serializable_hash}
     end 
 
     def show
-        render json: @car, serializer: CarSerializer, meta: { response_type: 'detail' }
+      HelloJob.perform_in(10.seconds, 'Hehehe', 'hahaha')
+      render json: CarSerializer.new(@car, response_type: 'detail').serializable_hash
     end
 
     def recommend

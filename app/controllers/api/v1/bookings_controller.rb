@@ -5,6 +5,11 @@ class Api::V1::BookingsController < ApiController
     include BookingsHelper
 
     def create
+        # booking = Booking.where(car_id: 5).last
+        # expired_at = booking.expired_at
+        # now = Time.zone.now
+        # is_expired = expired_at > Time.zone.now
+        # return render json:{data: booking, expired_at: now + 2.minutes, now: now, is_expired: is_expired}
         begin
           ActiveRecord::Base.transaction do
             inputs = booking_params
@@ -57,17 +62,21 @@ class Api::V1::BookingsController < ApiController
             params['car_price'] = car_price
             params['booking_status'] = 10
             params['has_insurance'] = 1
-            params['expired_at'] = Time.current + 10.minutes
+            params['expired_at'] = Time.zone.now + 10.minutes
 
             @booking = Booking.new(booking_params)
 
             if @booking.save 
+                @car.update(status: 1)
+                expiry = Time.zone.now + 10.minutes
+                CancelExpiredBookingJob.perform_in(expiry, @booking.id)
                 render_success(@booking, 'Booking was successful')
             else
                 render_error(@booking, 'Booking was failed')
             end
           end
         rescue StandardError => e
+        #   return render json:{e: e}
           render_error('Booking failed')
         end
     end
@@ -117,6 +126,7 @@ class Api::V1::BookingsController < ApiController
     end
 
     def booking_params
-        params.permit(:car_id, :booking_start, :booking_end, :user_id, :car_price, :booking_status, :has_insurance, :expired_at )
+        params.permit(:car_id, :booking_start, :booking_end, :user_id, :car_price, 
+                        :booking_status, :has_insurance, :expired_at )
     end 
 end
