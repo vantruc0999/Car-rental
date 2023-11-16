@@ -5,11 +5,6 @@ class Api::V1::BookingsController < ApiController
     include BookingsHelper
 
     def create
-        # booking = Booking.where(car_id: 5).last
-        # expired_at = booking.expired_at
-        # now = Time.zone.now
-        # is_expired = expired_at > Time.zone.now
-        # return render json:{data: booking, expired_at: now + 2.minutes, now: now, is_expired: is_expired}
         begin
           ActiveRecord::Base.transaction do
             inputs = booking_params

@@ -86,7 +86,6 @@ class Api::V1::CarsController < ApiController
     end 
 
     def show
-      HelloJob.perform_in(10.seconds, 'Hehehe', 'hahaha')
       render json: CarSerializer.new(@car, response_type: 'detail').serializable_hash
     end
 
