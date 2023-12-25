@@ -82,3 +82,5 @@ gem 'rufus-scheduler', '~> 3.9', '>= 3.9.1'
 gem 'active_model_serializers', '~> 0.10.14'
 
 gem 'sidekiq', '~> 7.2'
+
+gem 'stripe', '~> 10.3'

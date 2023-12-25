@@ -10,8 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_11_08_100653) do
-  create_table "bookings", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+ActiveRecord::Schema[7.1].define(version: 2023_12_22_095337) do
+  create_table "booking_services", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "booking_id", null: false, comment: "予約ID"
+    t.bigint "service_id", null: false, comment: "サービスのID"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booking_id"], name: "index_booking_services_on_booking_id"
+    t.index ["service_id"], name: "index_booking_services_on_service_id"
+  end
+
+  create_table "bookings", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "car_id", null: false, comment: "ユーザーID"
     t.bigint "user_id", null: false, comment: "車両のID"
     t.timestamp "booking_start", comment: "レンタル開始日"
@@ -26,21 +35,45 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_08_100653) do
     t.index ["user_id"], name: "index_bookings_on_user_id"
   end
 
-  create_table "brands", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "brands", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", comment: "車のブランド名"
     t.text "description", comment: "車のブランド説明"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "car_models", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "cancellations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "booking_id", null: false, comment: "予約ID"
+    t.text "cancellation_reason", null: false, comment: "予約ID"
+    t.integer "refund_amount", null: false, comment: "返金額"
+    t.integer "refund_status", limit: 1, comment: "\"\"0: 保留中(pending), 1: 払い戻し成功(refund successful), 2: 払い戻し失敗(refund failed)\"\"", unsigned: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booking_id"], name: "index_cancellations_on_booking_id"
+  end
+
+  create_table "car_models", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", comment: "車種名"
     t.text "description", comment: "車種の説明"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "cars", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "car_trackings", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "booking_id", null: false, comment: "予約ID"
+    t.bigint "car_id", null: false, comment: "ユーザーID"
+    t.timestamp "return_date", comment: "返却日"
+    t.integer "late_return_fee", comment: "遅延返却料金"
+    t.text "late_return_reason", comment: "遅延返却理由"
+    t.integer "car_tracking_status", limit: 1, comment: "\"0: 期限内に車を返す(Return the car on time), 1: 車を遅れて返す(Return the car late)\""
+    t.integer "payment_status", limit: 1, comment: "\"0: 支払い成功 (payment successful), 1: 支払い失敗 (payment failed)\"", unsigned: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booking_id"], name: "index_car_trackings_on_booking_id"
+    t.index ["car_id"], name: "index_car_trackings_on_car_id"
+  end
+
+  create_table "cars", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "brand_id", null: false, comment: "brandsテーブルのID"
     t.bigint "car_model_id", null: false, comment: "car_modelsテーブルのID"
     t.string "name", comment: "車の名前"
@@ -59,7 +92,7 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_08_100653) do
     t.index ["car_model_id"], name: "index_cars_on_car_model_id"
   end
 
-  create_table "oauth_access_grants", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "oauth_access_grants", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "resource_owner_id", null: false
     t.bigint "application_id", null: false
     t.string "token", null: false
@@ -73,7 +106,7 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_08_100653) do
     t.index ["token"], name: "index_oauth_access_grants_on_token", unique: true
   end
 
-  create_table "oauth_access_tokens", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "oauth_access_tokens", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "resource_owner_id"
     t.bigint "application_id", null: false
     t.string "token", null: false
@@ -89,7 +122,7 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_08_100653) do
     t.index ["token"], name: "index_oauth_access_tokens_on_token", unique: true
   end
 
-  create_table "oauth_applications", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "oauth_applications", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "uid", null: false
     t.string "secret", null: false
@@ -101,21 +134,40 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_08_100653) do
     t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
   end
 
-  create_table "reviews", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "payments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "booking_id", null: false, comment: "予約ID"
+    t.integer "amount", null: false, comment: "金額"
+    t.integer "payment_status", limit: 1, comment: "\"0: 支払い成功 (payment successful), 1: 支払い失敗 (payment failed)\"", unsigned: true
+    t.integer "payment_method", limit: 1, comment: "\"0: ストライプ (stripe), 1: 銀行 (bank)\"", unsigned: true
+    t.string "stripe_session_id", comment: "ストライプセッションID"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booking_id"], name: "index_payments_on_booking_id"
+  end
+
+  create_table "reviews", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "user_id", null: false, comment: "ユーザーID"
     t.bigint "car_id", null: false, comment: "車両のID"
-    t.bigint "booking_id_id", null: false, comment: "予約ID (UUID)"
+    t.bigint "booking_id", null: false, comment: "予約ID (UUID)"
     t.float "rating", comment: "評価された星の数"
     t.text "comment", comment: "ユーザーコメント"
     t.integer "status", comment: "\"0: 承認待ち (Pending), 1: 承認済み (Approved)\""
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["booking_id_id"], name: "index_reviews_on_booking_id_id"
+    t.index ["booking_id"], name: "index_reviews_on_booking_id"
     t.index ["car_id"], name: "index_reviews_on_car_id"
     t.index ["user_id"], name: "index_reviews_on_user_id"
   end
 
-  create_table "users", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+  create_table "services", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "name", comment: "名前サービス"
+    t.integer "price", null: false, comment: "価格サービス"
+    t.text "description", comment: "説明サービス"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
@@ -128,16 +180,24 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_08_100653) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "role", limit: 1, default: 0, comment: "\"0: 管理者 (user), 1: エンドユーザー (admin)\"", unsigned: true
+    t.string "name"
+    t.date "birth_day"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "booking_services", "bookings", on_delete: :cascade
+  add_foreign_key "booking_services", "services", on_delete: :cascade
   add_foreign_key "bookings", "cars", on_delete: :cascade
   add_foreign_key "bookings", "users", on_delete: :cascade
+  add_foreign_key "cancellations", "bookings", on_delete: :cascade
+  add_foreign_key "car_trackings", "bookings", on_delete: :cascade
+  add_foreign_key "car_trackings", "cars", on_delete: :cascade
   add_foreign_key "cars", "brands", on_delete: :cascade
   add_foreign_key "cars", "car_models", on_delete: :cascade
   add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
+  add_foreign_key "payments", "bookings", on_delete: :cascade
   add_foreign_key "reviews", "cars", on_delete: :cascade
   add_foreign_key "reviews", "users", on_delete: :cascade
 end
