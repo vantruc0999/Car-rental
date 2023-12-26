@@ -5,6 +5,7 @@ namespace :api do
             get '/confirm/:confirmation_token', to: "auth#confirm", as: :user_confirmation
             post 'password/forgot', to: 'auth#forgot'
             post 'password/reset/:token', to: 'auth#reset'
+            get '/bookings', to: 'users#get_booking_history'
         end
 
         resources :brands
@@ -23,6 +24,8 @@ namespace :api do
                 post '/:car_id/reviews', to: "bookings#create_review"
             end
         end
+
+        post "payment/create", to: "payment#handle_payment"
     end
 end
 

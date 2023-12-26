@@ -8,7 +8,9 @@ class Api::V1::Users::UsersController < ApiController
     end
 
     def get_booking_history
-
+        return render json: {
+            data: current_user.bookings
+        }
     end
 
     def get_detail_booking_history
