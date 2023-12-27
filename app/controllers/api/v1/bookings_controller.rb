@@ -64,7 +64,7 @@ class Api::V1::BookingsController < ApiController
             if @booking.save 
                 @car.update(status: 1)
                 expiry = Time.zone.now + 10.minutes
-                CancelExpiredBookingJob.perform_in(expiry, @booking.id)
+                # CancelExpiredBookingJob.perform_in(expiry, @booking.id)
                 render_success(@booking, 'Booking was successful')
             else
                 render_error(@booking, 'Booking was failed')
