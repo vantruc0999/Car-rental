@@ -11,37 +11,52 @@ class Api::V1::BookingsController < ApiController
             user_id = current_user.id
             car_name = @car.name
       
-            existing_bookings = Booking.where(car_id: inputs[:car_id])
-              .where.not(booking_status: [10, 20])
-              .where("(booking_start BETWEEN ? AND ?) OR (booking_end BETWEEN ? AND ?)",
-                     params[:booking_start], params[:booking_end],
-                     params[:booking_start], params[:booking_end])
-              .to_a
+            # existing_bookings = Booking.where(car_id: inputs[:car_id])
+            #   .where.not(booking_status: [10, 20])
+            #   .where("(booking_start BETWEEN ? AND ?) OR (booking_end BETWEEN ? AND ?)",
+            #          params[:booking_start], params[:booking_end],
+            #          params[:booking_start], params[:booking_end])
+            #   .to_a
       
-            if existing_bookings.present?
-                return render_error('Car already booked')
-            end
+            # if existing_bookings.present?
+            #     return render_error('Car already booked')
+            # end
 
-            existing_booking_of_user = Booking.where(user_id: user_id)
-                .where.not(car_id: @car.id)
-                .where(booking_status: [10, 11, 12, 30])
-                .where('(booking_start BETWEEN ? AND ?) OR (booking_end BETWEEN ? AND ?)', 
+            params[:booking_start] = Time.parse(params[:booking_start])
+            params[:booking_end] = Time.parse(params[:booking_end])
+
+            existing_booking_holding = Booking::where(user_id: user_id)
+                .where.not(car_id: params[:car_id])
+                .where(booking_status: 11)
+                .where('(booking_start BETWEEN ? AND ?) OR (booking_end BETWEEN ? AND ?)',
                     params[:booking_start], params[:booking_end],
                     params[:booking_start], params[:booking_end])
                 .first
 
-            if existing_booking_of_user.present?
-                return render_error('Booking already exists')
+            if existing_booking_holding 
+                return render_error('Booking holding already exists') 
+            end
+            
+            existing_booking_in_time = Booking::where(user_id: user_id)
+                .where.not(car_id: params[:car_id])
+                .where(booking_status: [12, 20])    
+                .where('(booking_start <= ? AND booking_end >= ?) OR (booking_start <= ? AND booking_end >= ?)',
+                        params[:booking_end], params[:booking_start],
+                        params[:booking_start], params[:booking_end])
+                .first
+
+            if existing_booking_in_time 
+                return render_error('Booking in time already exists') 
             end
 
             car_price = calculate_car_price(@car.price_per_hour, params[:booking_start],  params[:booking_end])
 
-            existing_booking = Booking.where(user_id: user_id)
-                .where(car_id: @car.id)
-                .where('(booking_start BETWEEN ? AND ?) OR (booking_end BETWEEN ? AND ?)', 
-                    params[:booking_start], params[:booking_end],
-                    params[:booking_start], params[:booking_end])
-                .first
+            # existing_booking = Booking.where(user_id: user_id)
+            #     .where(car_id: @car.id)
+            #     .where('(booking_start BETWEEN ? AND ?) OR (booking_end BETWEEN ? AND ?)', 
+            #         params[:booking_start], params[:booking_end],
+            #         params[:booking_start], params[:booking_end])
+            #     .first
 
             if(existing_booking)
                 current_time = Time.current
@@ -71,7 +86,7 @@ class Api::V1::BookingsController < ApiController
             end
           end
         rescue StandardError => e
-        #   return render json:{e: e}
+          return render json:{e: e}
           render_error('Booking failed')
         end
     end

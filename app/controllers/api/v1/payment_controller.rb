@@ -35,11 +35,11 @@ class Api::V1::PaymentController < ApiController
 
       booking_services_price = services.sum(&:price)
 
-      booking.update([
+      booking.update(
         service_price: booking_services_price,
         has_insurance: has_insurance,
         booking_status: 11
-      ])
+      )
       # return render json:{data: total_amount}
   
       # Process other parts of payment logic
@@ -75,7 +75,7 @@ class Api::V1::PaymentController < ApiController
               name: booking.car.name,
               images: [car_image_url],
             },
-            unit_amount: booking.car_price,
+            unit_amount: booking.car_price * 100,
           },
           quantity: 1,
           tax_rates: [tax_rates.id]
