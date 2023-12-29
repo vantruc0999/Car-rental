@@ -51,14 +51,14 @@ class Api::V1::BookingsController < ApiController
 
             car_price = calculate_car_price(@car.price_per_hour, params[:booking_start],  params[:booking_end])
 
-            # existing_booking = Booking.where(user_id: user_id)
-            #     .where(car_id: @car.id)
-            #     .where('(booking_start BETWEEN ? AND ?) OR (booking_end BETWEEN ? AND ?)', 
-            #         params[:booking_start], params[:booking_end],
-            #         params[:booking_start], params[:booking_end])
-            #     .first
+            existing_booking = Booking.where(user_id: user_id)
+                .where(car_id: @car.id)
+                .where('(booking_start BETWEEN ? AND ?) OR (booking_end BETWEEN ? AND ?)', 
+                    params[:booking_start], params[:booking_end],
+                    params[:booking_start], params[:booking_end])
+                .first
 
-            if(existing_booking)
+            if existing_booking
                 current_time = Time.current
                 expired_time = existing_booking.expired_at
                 time_difference = (expired_time - current_time).to_i
@@ -72,14 +72,14 @@ class Api::V1::BookingsController < ApiController
             params['car_price'] = car_price
             params['booking_status'] = 10
             params['has_insurance'] = 1
-            params['expired_at'] = Time.zone.now + 10.minutes
+            params['expired_at'] = Time.zone.now + 1.minutes
 
             @booking = Booking.new(booking_params)
 
             if @booking.save 
                 @car.update(status: 1)
-                expiry = Time.zone.now + 10.minutes
-                # CancelExpiredBookingJob.perform_in(expiry, @booking.id)
+                expiry = Time.zone.now + 1.minutes
+                CancelExpiredBookingJob.perform_in(expiry, @booking.id)
                 render_success(@booking, 'Booking was successful')
             else
                 render_error(@booking, 'Booking was failed')

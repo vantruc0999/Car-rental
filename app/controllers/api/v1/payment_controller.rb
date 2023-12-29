@@ -40,12 +40,19 @@ class Api::V1::PaymentController < ApiController
         has_insurance: has_insurance,
         booking_status: 11
       )
-      # return render json:{data: total_amount}
   
       # Process other parts of payment logic
-      payment = Payment.find_or_initialize_by(booking_id: booking.id)
+      existing_payment = Payment.find_or_initialize_by(booking_id: booking.id)
+
+      if(existing_payment && existing_payment.payment_method == 1)
+        return render_error('A payment via bank transfer already exists for this reservation')
+      end
+
+      if(booking.booking_status == 40)
+        return render_error('Booking has been canceled')
+      end
   
-      payment.update(
+      existing_payment.update(
         amount: total_amount,
         payment_status: 0,
         payment_method: 0
@@ -56,12 +63,20 @@ class Api::V1::PaymentController < ApiController
       car_image_url = 'https://img1.oto.com.vn/2023/05/09/OpzfnMD2/glc300-5dcd.jpg'
   
       session = create_stripe_checkout_session(booking, car_image_url, tax_rates)
+
+      return render_error('Stripe checkout session creation failed.') unless session['id'].present?
+
+      existing_payment.update(
+          stripe_session_id: session['id'],
+          payment_status: 1
+      )
   
-      render json: { data: session }
+      return render json: { data: session }
     end
   
     def create_stripe_payment
       # Implementation for creating a Stripe payment
+
     end
   
     def create_stripe_checkout_session(booking, car_image_url, tax_rates)
@@ -89,12 +104,12 @@ class Api::V1::PaymentController < ApiController
   
     def create_stripe_tax_rate(consumption_tax)
       Stripe::TaxRate.create(
-        display_name: '消費税',
+        display_name: 'Consumption tax',
         inclusive: false,
         percentage: consumption_tax,
         country: 'JP',
         jurisdiction: 'JP',
-        description: "消費税 (#{consumption_tax}%)"
+        description: "Consumption tax (#{consumption_tax}%)"
       )
     end
   end
