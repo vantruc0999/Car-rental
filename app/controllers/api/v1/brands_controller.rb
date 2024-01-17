@@ -37,7 +37,7 @@ class Api::V1::BrandsController < ApiController
         render_success(@brand, "brand deleted successfully")
     end
 
-    private 
+    private
 
     def set_brand
         @brand = Brand.find_by(id: params[:id])

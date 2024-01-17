@@ -84,3 +84,6 @@ gem 'active_model_serializers', '~> 0.10.14'
 gem 'sidekiq', '~> 7.2'
 
 gem 'stripe', '~> 10.3'
+
+gem 'rspec-rails'
+gem 'factory_bot_rails'

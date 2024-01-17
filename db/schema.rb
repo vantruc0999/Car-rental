@@ -25,6 +25,7 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_22_095337) do
     t.bigint "user_id", null: false, comment: "車両のID"
     t.timestamp "booking_start", comment: "レンタル開始日"
     t.timestamp "booking_end", comment: "レンタル終了日"
+    t.integer "service_price", comment: "サービス料金"
     t.boolean "has_insurance", default: true, comment: "保険を購入しましたか？ True/false"
     t.integer "booking_status", default: 0, comment: "10: 予定 (Upcoming), 11: 支払い待ち (Waiting for Payment), 12: 支払い済み (Paid), 20: レンタル中 (Renting), 30: 完了 (Completed), 40: キャンセル (Canceled)"
     t.integer "car_price", comment: "車の価格"
@@ -180,8 +181,6 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_22_095337) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "role", limit: 1, default: 0, comment: "\"0: 管理者 (user), 1: エンドユーザー (admin)\"", unsigned: true
-    t.string "name"
-    t.date "birth_day"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
