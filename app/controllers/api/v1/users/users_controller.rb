@@ -1,6 +1,7 @@
 class Api::V1::Users::UsersController < ApiController
     def get_user_profile
-        
+        # remove this line
+        # keep this line
     end
 
     def update
@@ -8,8 +9,9 @@ class Api::V1::Users::UsersController < ApiController
     end
 
     def get_booking_history
+        booking_data = current_user.bookings
         return render json: {
-            data: current_user.bookings
+            data: booking_data
         }
     end
 
