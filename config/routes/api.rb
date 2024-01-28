@@ -6,13 +6,14 @@ namespace :api do
             post 'password/forgot', to: 'auth#forgot'
             post 'password/reset/:token', to: 'auth#reset'
             get '/bookings', to: 'users#get_booking_history'
+            get '/profile', to: 'users#get_user_profile'
         end
 
         resources :brands
 
         resources :car_models
 
-        resources :cars do 
+        resources :cars do
             collection do
                 get '/recommend', to: "cars#recommend"
             end
