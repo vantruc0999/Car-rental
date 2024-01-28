@@ -17,6 +17,7 @@ class Api::V1::Users::UsersController < ApiController
     end
 
     def get_detail_booking_history
-        # hehehehe
+        #kkkkk
+        #heheheeh
     end
 end
